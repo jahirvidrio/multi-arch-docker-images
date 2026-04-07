@@ -3,6 +3,8 @@ ARG MONGOSH_VERSION=latest
 
 FROM node:lts-alpine AS builder
 
+ARG MONGOSH_VERSION
+
 WORKDIR /opt/mongosh
 
 RUN \
