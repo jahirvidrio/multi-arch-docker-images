@@ -1,7 +1,8 @@
-ARG MONGOSH_VERSION=latest
+ARG ALPINE_VERSION="3.23"
+ARG MONGOSH_VERSION="latest"
 
 
-FROM node:lts-alpine AS builder
+FROM "node:lts-alpine${ALPINE_VERSION}" AS builder
 
 ARG MONGOSH_VERSION
 
@@ -10,14 +11,18 @@ WORKDIR /opt/mongosh
 RUN \
     apk add --no-cache python3 make g++ \
     && wget -qO- https://gobinaries.com/tj/node-prune | sh \
-    && npm --silent view "mongosh@$MONGOSH_VERSION" dist.tarball | xargs wget -qO- | tar -xz --strip-components=1 \
+    && npm --silent view "mongosh@${MONGOSH_VERSION}" dist.tarball | xargs wget -qO- | tar -xz --strip-components=1 \
     && npm install --omit=dev --no-audit --no-fund \
     && node-prune ./node_modules/ 
 
 
-FROM node:lts-alpine
+FROM "alpine:${ALPINE_VERSION}"
 
 COPY --from=builder /opt/mongosh /opt/mongosh
-RUN ln -s /opt/mongosh/bin/mongosh.js /usr/local/bin/mongosh
+COPY --from=builder /usr/local/bin/node /usr/local/bin/
+
+RUN \ 
+    apk add --no-cache libstdc++ mongodb-tools \
+    && ln -s /opt/mongosh/bin/mongosh.js /usr/local/bin/mongosh 
 
 ENTRYPOINT []
