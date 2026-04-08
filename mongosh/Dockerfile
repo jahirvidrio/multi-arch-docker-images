@@ -1,17 +1,17 @@
 ARG ALPINE_VERSION="3.23"
-ARG MONGOSH_VERSION="latest"
+ARG VERSION="latest"
 
 
 FROM "node:lts-alpine${ALPINE_VERSION}" AS builder
 
-ARG MONGOSH_VERSION
+ARG VERSION
 
 WORKDIR /opt/mongosh
 
 RUN \
     apk add --no-cache python3 make g++ \
     && wget -qO- https://gobinaries.com/tj/node-prune | sh \
-    && npm --no-update-notifier --silent view "mongosh@${MONGOSH_VERSION}" dist.tarball | xargs wget -qO- | tar -xz --strip-components=1 \
+    && npm --no-update-notifier --silent view "mongosh@${VERSION}" dist.tarball | xargs wget -qO- | tar -xz --strip-components=1 \
     && npm install --no-update-notifier --omit=dev --no-audit --no-fund \
     && node-prune ./node_modules/ 
 
